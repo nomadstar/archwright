@@ -39,7 +39,7 @@ _pkg_is_official() {
 # --- contract ------------------------------------------------------------
 
 role_check() {
-  local workspace="$1"; shift
+  shift # $1 is the workspace root; unused by this role (declared-file args are already absolute)
   local -a declared=()
   local pkg
   while IFS= read -r pkg; do declared+=("$pkg"); done < <(_pkg_declared_list "$@")
@@ -84,7 +84,7 @@ role_check() {
 }
 
 role_apply() {
-  local workspace="$1"; shift
+  shift # $1 is the workspace root; unused by this role (declared-file args are already absolute)
   local -a declared=() to_install=()
   local pkg
   while IFS= read -r pkg; do declared+=("$pkg"); done < <(_pkg_declared_list "$@")
@@ -114,7 +114,7 @@ role_apply() {
 }
 
 role_verify() {
-  local workspace="$1"; shift
+  shift # $1 is the workspace root; unused by this role (declared-file args are already absolute)
   local -a declared=()
   local pkg
   while IFS= read -r pkg; do declared+=("$pkg"); done < <(_pkg_declared_list "$@")

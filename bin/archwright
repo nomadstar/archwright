@@ -83,21 +83,25 @@ workspace="$(cd "$workspace" && pwd)"
 
 case "$subcommand" in
   validate)
+    # shellcheck source=lib/commands/validate.sh
     source "${ARCHWRIGHT_LIB_DIR}/commands/validate.sh"
     cmd_validate "$workspace"
     ;;
   plan)
     [[ -n "$profile" ]] || archwright_die "$EXIT_UNEXPECTED" "--profile is required for 'plan'"
+    # shellcheck source=lib/commands/plan.sh
     source "${ARCHWRIGHT_LIB_DIR}/commands/plan.sh"
     cmd_plan "$workspace" "$profile"
     ;;
   converge)
     [[ -n "$profile" ]] || archwright_die "$EXIT_UNEXPECTED" "--profile is required for 'converge'"
+    # shellcheck source=lib/commands/converge.sh
     source "${ARCHWRIGHT_LIB_DIR}/commands/converge.sh"
     cmd_converge "$workspace" "$profile"
     ;;
   drift)
     [[ -n "$profile" ]] || archwright_die "$EXIT_UNEXPECTED" "--profile is required for 'drift'"
+    # shellcheck source=lib/commands/drift.sh
     source "${ARCHWRIGHT_LIB_DIR}/commands/drift.sh"
     cmd_drift "$workspace" "$profile"
     ;;

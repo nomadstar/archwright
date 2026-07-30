@@ -21,8 +21,21 @@ jobs:
       - name: shellcheck
         run: |
           set -e
-          mapfile -t files < <(find bin lib scripts tests/integration -type f \( -name '*.sh' -o -name 'archwright' \))
-          shellcheck "${files[@]}"
+          # bin/archwright is checked with -x so shellcheck follows its
+          # `source` statements (annotated with `# shellcheck source=...`)
+          # into lib/contract.sh, lib/workspace.sh, lib/commands/*.sh and
+          # analyzes that whole reachable graph as one unit -- otherwise
+          # each file checked standalone falsely reports the other files'
+          # only consumers as "declared but unused" (SC2034).
+          shellcheck -x bin/archwright
+
+          # lib/roles/*.sh are intentionally NOT followed from
+          # bin/archwright (contract.sh sources them via a runtime
+          # variable, annotated `source=/dev/null` on purpose -- a role is
+          # not known until the workspace names one), so they're checked
+          # standalone here, along with scripts and the integration test.
+          mapfile -t standalone < <(find lib/roles scripts tests/integration -type f -name '*.sh')
+          shellcheck "${standalone[@]}"
 
   secret-scan:
     runs-on: ubuntu-latest

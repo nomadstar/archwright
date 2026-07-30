@@ -70,7 +70,7 @@ _svc_exists() {
 # --- contract ------------------------------------------------------------
 
 role_check() {
-  local workspace="$1"; shift
+  shift # $1 is the workspace root; unused by this role (declared-file args are already absolute)
   local SYSTEM_FILES USER_FILES
   _svc_split_args "$@"
 
@@ -131,7 +131,7 @@ role_check() {
 }
 
 role_apply() {
-  local workspace="$1"; shift
+  shift # $1 is the workspace root; unused by this role (declared-file args are already absolute)
   local SYSTEM_FILES USER_FILES
   _svc_split_args "$@"
 
@@ -187,7 +187,7 @@ role_apply() {
 }
 
 role_verify() {
-  local workspace="$1"; shift
+  shift # $1 is the workspace root; unused by this role (declared-file args are already absolute)
   local SYSTEM_FILES USER_FILES
   _svc_split_args "$@"
 

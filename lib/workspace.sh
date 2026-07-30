@@ -131,14 +131,23 @@ archwright_try_load_profile() {
     esac
   done <<< "$parsed"
 
-  if [[ -z "$ARCHWRIGHT_PROFILE_NAME" ]]; then
-    archwright_warn "profile '${profile}' is missing required key 'name'"
-    rc=1
-  fi
-  if [[ "${#ARCHWRIGHT_PROFILE_PACKAGE_FILES[@]}" -eq 0 ]]; then
-    archwright_warn "profile '${profile}' is missing required key 'packages'"
-    rc=1
-  fi
+  local req
+  for req in $ARCHWRIGHT_PROFILE_REQUIRED_KEYS; do
+    case "$req" in
+      name)
+        if [[ -z "$ARCHWRIGHT_PROFILE_NAME" ]]; then
+          archwright_warn "profile '${profile}' is missing required key 'name'"
+          rc=1
+        fi
+        ;;
+      packages)
+        if [[ "${#ARCHWRIGHT_PROFILE_PACKAGE_FILES[@]}" -eq 0 ]]; then
+          archwright_warn "profile '${profile}' is missing required key 'packages'"
+          rc=1
+        fi
+        ;;
+    esac
+  done
 
   local f
   for f in "${ARCHWRIGHT_PROFILE_PACKAGE_FILES[@]}" \
