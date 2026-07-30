@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# bin/archwright — CLI entrypoint.
+#
+# Requires bash >= 4.4 (relies on well-defined behavior of `"${arr[@]}"`
+# for declared-but-empty arrays under `set -u`).
+set -euo pipefail
+
+readonly ARCHWRIGHT_VERSION="0.1.0-dev"
+
+_self="$(readlink -f "${BASH_SOURCE[0]}")"
+ARCHWRIGHT_ROOT="$(cd "$(dirname "$_self")/.." && pwd)"
+ARCHWRIGHT_LIB_DIR="${ARCHWRIGHT_ROOT}/lib"
+export ARCHWRIGHT_LIB_DIR
+
+# shellcheck source=lib/contract.sh
+source "${ARCHWRIGHT_LIB_DIR}/contract.sh"
+# shellcheck source=lib/workspace.sh
+source "${ARCHWRIGHT_LIB_DIR}/workspace.sh"
+# shellcheck source=lib/commands/_common.sh
+source "${ARCHWRIGHT_LIB_DIR}/commands/_common.sh"
+
+archwright_usage() {
+  cat <<'EOF'
+archwright — converge an Arch Linux workspace towards its declared state.
+
+USAGE:
+  archwright validate --workspace <path>
+  archwright plan     --workspace <path> --profile <name>
+  archwright converge --workspace <path> --profile <name>
+  archwright drift    --workspace <path> --profile <name>
+
+  archwright --version
+  archwright --help
+
+validate  Check workspace structure and every profile. No system changes.
+plan      Run the check() stage only; report what converge would do.
+converge  Run check(), then apply()+verify() for roles with pending changes.
+drift     Report-only comparison of declared vs. real state.
+
+See docs/spec/ for the Workspace Specification (currently v0, unstable)
+and docs/contract.md for the role contract and the exit code reference.
+EOF
+}
+
+if [[ $# -eq 0 ]]; then
+  archwright_usage
+  exit "$EXIT_UNEXPECTED"
+fi
+
+case "$1" in
+  --help|-h)
+    archwright_usage
+    exit "$EXIT_OK"
+    ;;
+  --version)
+    echo "archwright ${ARCHWRIGHT_VERSION} (workspace spec v${ARCHWRIGHT_SPEC_VERSION})"
+    exit "$EXIT_OK"
+    ;;
+esac
+
+subcommand="$1"; shift
+workspace=""
+profile=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --workspace)
+      [[ $# -ge 2 ]] || archwright_die "$EXIT_UNEXPECTED" "--workspace requires a value"
+      workspace="$2"; shift 2 ;;
+    --profile)
+      [[ $# -ge 2 ]] || archwright_die "$EXIT_UNEXPECTED" "--profile requires a value"
+      profile="$2"; shift 2 ;;
+    --help|-h)
+      archwright_usage; exit "$EXIT_OK" ;;
+    *)
+      archwright_die "$EXIT_UNEXPECTED" "unknown argument: $1" ;;
+  esac
+done
+
+[[ -n "$workspace" ]] || archwright_die "$EXIT_UNEXPECTED" "--workspace is required"
+[[ -d "$workspace" ]] || archwright_die "$EXIT_UNEXPECTED" "workspace directory not found: ${workspace}"
+workspace="$(cd "$workspace" && pwd)"
+
+case "$subcommand" in
+  validate)
+    source "${ARCHWRIGHT_LIB_DIR}/commands/validate.sh"
+    cmd_validate "$workspace"
+    ;;
+  plan)
+    [[ -n "$profile" ]] || archwright_die "$EXIT_UNEXPECTED" "--profile is required for 'plan'"
+    source "${ARCHWRIGHT_LIB_DIR}/commands/plan.sh"
+    cmd_plan "$workspace" "$profile"
+    ;;
+  converge)
+    [[ -n "$profile" ]] || archwright_die "$EXIT_UNEXPECTED" "--profile is required for 'converge'"
+    source "${ARCHWRIGHT_LIB_DIR}/commands/converge.sh"
+    cmd_converge "$workspace" "$profile"
+    ;;
+  drift)
+    [[ -n "$profile" ]] || archwright_die "$EXIT_UNEXPECTED" "--profile is required for 'drift'"
+    source "${ARCHWRIGHT_LIB_DIR}/commands/drift.sh"
+    cmd_drift "$workspace" "$profile"
+    ;;
+  *)
+    archwright_usage
+    archwright_die "$EXIT_UNEXPECTED" "unknown subcommand: ${subcommand}"
+    ;;
+esac
