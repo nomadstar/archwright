@@ -34,6 +34,9 @@ USAGE:
   archwright asset scan <file-or-dir>... --workspace <path>
   archwright asset list --workspace <path>
 
+  archwright workspace publish --provider <name> --workspace <path>
+                                [--repo <name>] [--remote <name>]
+
   archwright --version
   archwright --help
 
@@ -42,6 +45,7 @@ plan      Run the check() stage only; report what converge would do.
 converge  Run check(), then apply()+verify() for roles with pending changes.
 drift     Report-only comparison of declared vs. real state.
 asset     Declared-asset actions (system<->workspace). See ADR 0014.
+workspace Publish a workspace to a private remote (workspace->remote). See ADR 0015.
 
 See docs/spec/ for the Workspace Specification (currently v0.1, unstable)
 and docs/contract.md for the role contract and the exit code reference.
@@ -70,6 +74,13 @@ if [[ "$subcommand" == "asset" ]]; then
   # shellcheck source=lib/commands/asset.sh
   source "${ARCHWRIGHT_LIB_DIR}/commands/asset.sh"
   cmd_asset "$@"
+  exit $?
+fi
+
+if [[ "$subcommand" == "workspace" ]]; then
+  # shellcheck source=lib/commands/workspace.sh
+  source "${ARCHWRIGHT_LIB_DIR}/commands/workspace.sh"
+  cmd_workspace "$@"
   exit $?
 fi
 
