@@ -2,7 +2,7 @@
 # lib/commands/_common.sh — shared helpers for CLI subcommands.
 # No `set -e`/`-u`/`pipefail` here — see the note in lib/contract.sh.
 
-readonly ARCHWRIGHT_ROLES="package service"
+readonly ARCHWRIGHT_ROLES="package service assets"
 
 # archwright_invoke_role <role> <stage> <workspace>
 # Builds the correct argument list for the given role and calls
@@ -22,6 +22,14 @@ archwright_invoke_role() {
       ;;
     service)
       if ARCHWRIGHT_LAST_OUTPUT="$(archwright_run_role service "$stage" "$workspace" --system "${ARCHWRIGHT_PROFILE_SERVICE_SYSTEM_FILES[@]}" --user "${ARCHWRIGHT_PROFILE_SERVICE_USER_FILES[@]}")"; then
+        return "$EXIT_OK"
+      else
+        return "$?"
+      fi
+      ;;
+    assets)
+      # Not scoped by profile — see the note at the top of lib/roles/assets.sh.
+      if ARCHWRIGHT_LAST_OUTPUT="$(archwright_run_role assets "$stage" "$workspace")"; then
         return "$EXIT_OK"
       else
         return "$?"
