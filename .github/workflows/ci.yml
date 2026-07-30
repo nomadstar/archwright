@@ -29,12 +29,13 @@ jobs:
           # only consumers as "declared but unused" (SC2034).
           shellcheck -x bin/archwright
 
-          # lib/roles/*.sh are intentionally NOT followed from
-          # bin/archwright (contract.sh sources them via a runtime
-          # variable, annotated `source=/dev/null` on purpose -- a role is
-          # not known until the workspace names one), so they're checked
-          # standalone here, along with scripts and the integration test.
-          mapfile -t standalone < <(find lib/roles scripts tests/integration -type f -name '*.sh')
+          # lib/roles/*.sh and lib/providers/*.sh are intentionally NOT
+          # followed from bin/archwright (contract.sh / workspace_publish.sh
+          # source them via a runtime variable, annotated `source=/dev/null`
+          # on purpose -- a role/provider is not known until the workspace
+          # or --provider flag names one), so they're checked standalone
+          # here, along with scripts and the integration test.
+          mapfile -t standalone < <(find lib/roles lib/providers scripts tests/integration -type f -name '*.sh')
           shellcheck "${standalone[@]}"
 
   secret-scan:
