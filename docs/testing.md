@@ -46,7 +46,13 @@ and fails (non-zero exit) unless:
 
 1. `validate` exits `0`.
 2. The first `plan` exits `2` (`EXIT_CHANGED` — a fresh container has
-   neither `tree`/`openssh` installed nor `sshd.service` enabled).
+   neither `tree`/`openssh` installed nor `systemd-timesyncd.service`
+   enabled). The example workspace deliberately declares a service whose
+   unit file ships with `systemd` itself rather than with a package the
+   same profile installs — see
+   `docs/decisions/0013-roles-do-not-order-against-each-other.md` for why
+   that pairing would make `plan` (which never applies anything) report
+   `EXIT_VALIDATION_ERROR` instead.
 3. The first `converge` exits `0` or `2`, and does not exit `4`/`5`
    (`EXIT_APPLY_FAILED`/`EXIT_VERIFY_FAILED`).
 4. **The second `converge` exits exactly `0`** — this is the property the

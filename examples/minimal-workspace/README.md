@@ -11,10 +11,12 @@ A deliberately tiny, entirely fictional workspace that plays three roles at once
    inside an ephemeral Arch container to prove convergence is idempotent.
 
 It declares two packages (`tree`, `openssh`) and one system service
-(`sshd.service`, shipped by `openssh`) — chosen because installing and
-enabling them has no side effects worth worrying about in a throwaway
-container: no ports get opened by installation alone, and `converge` only
-*enables* the unit, it never starts it.
+(`systemd-timesyncd.service`, shipped by `systemd` itself — deliberately
+*not* by either declared package, see
+`docs/decisions/0013-roles-do-not-order-against-each-other.md`) — chosen
+because installing and enabling them has no side effects worth worrying
+about in a throwaway container: no ports get opened by installation
+alone, and `converge` only *enables* the unit, it never starts it.
 
 **Do not use this as a template for your own workspace's secrets or
 hardware profile** — it intentionally has neither. See

@@ -5,7 +5,7 @@ unit name per line, `#` comments, blank lines ignored.
 
 ```
 # services/system.txt
-sshd.service
+systemd-timesyncd.service
 ```
 
 ## System vs. user units — separate files, not a prefix
@@ -20,7 +20,7 @@ put them in separate files instead.
 
 | Condition | Bucket |
 |---|---|
-| Declared unit name has no corresponding unit file at all (`systemctl list-unit-files` finds nothing) | **Blocks that role's convergence** — reported as `status=unresolvable`, `EXIT_VALIDATION_ERROR` for that role's check. |
+| Declared unit name has no corresponding unit file at all (`systemctl list-unit-files` finds nothing) | **Blocks that role's convergence** — reported as `status=unresolvable`, `EXIT_VALIDATION_ERROR` for that role's check. **Caveat:** if the unit file is shipped by a package this same profile declares but hasn't installed yet, `check()`/`plan` will report this even though `converge` would succeed (package role's `apply()` runs first) — see `docs/decisions/0013-roles-do-not-order-against-each-other.md`. Avoid the false positive by not pairing a package with the service it provides in the same profile. |
 | Declared unit exists but is already enabled | **No-op**, reported as `status=ok`. |
 | Declared unit exists and is disabled | Reported as `status=missing`; `converge` enables it. |
 | A `services_user=` file is declared but no systemd user session bus is reachable (e.g. a minimal CI container) | **Skipped, not an error** — reported as `status=skipped`. This is a known limitation of v0, not a silent success: see `docs/decisions/0009-user-units-require-a-session-bus.md`. |

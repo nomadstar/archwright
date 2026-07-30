@@ -3,9 +3,9 @@
 This walks through the full command sequence against the bundled example
 workspace. It doesn't touch your real system's package or service state
 beyond what `examples/minimal-workspace` declares (`tree`, `openssh`,
-`sshd.service` — see `examples/minimal-workspace/README.md` for why those
-were chosen), and every command tells you what it's about to do before
-`converge` does anything.
+`systemd-timesyncd.service` — see `examples/minimal-workspace/README.md`
+for why those were chosen), and every command tells you what it's about
+to do before `converge` does anything.
 
 ## Prerequisites
 
@@ -25,7 +25,8 @@ cd archwright
 ./bin/archwright plan --workspace examples/minimal-workspace --profile ci
 
 # 3. Actually converge (installs `tree`/`openssh` if missing, enables
-#    sshd.service if disabled — requires root for those two operations)
+#    systemd-timesyncd.service if disabled — requires root for those two
+#    operations)
 sudo ./bin/archwright converge --workspace examples/minimal-workspace --profile ci
 
 # 4. Run it again — this should report EXIT_OK (no changes) for every role
