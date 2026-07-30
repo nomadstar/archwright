@@ -31,6 +31,22 @@ enforce ranges; it only checks the file is present and well-formed). Example:
 **Blocks execution if:** the file is missing, empty, or does not match the
 pattern above.
 
+## Optional
+
+```
+<workspace>/
+└── assets/
+    ├── manifest/
+    │   └── *.conf
+    └── payload/
+        └── <sha256[0:2]>/<sha256>
+```
+
+`assets/` is optional — see `docs/spec/assets-format.md` for the grammar.
+Added in spec `0.1` (ADR 0014); a spec-`0.0`-shaped workspace without
+`assets/` remains valid, per the additive/compatible policy in
+`docs/decisions/0006-spec-versioned-separately-from-engine.md`.
+
 ## What is *not* part of the layout yet
 
 `dotfiles/`, `secrets/`, `bootstrap/hardware/`, and a `hooks` role are all

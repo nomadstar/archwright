@@ -18,6 +18,14 @@ because installing and enabling them has no side effects worth worrying
 about in a throwaway container: no ports get opened by installation
 alone, and `converge` only *enables* the unit, it never starts it.
 
+It also declares one asset (`assets/manifest/example-note.conf`, a small
+text payload restoring to `~/.local/share/archwright-example/note.txt`) —
+see `docs/spec/assets-format.md` and
+`docs/decisions/0014-declared-assets-and-capture-restore-lifecycle.md`.
+As of this manifest's addition there is no `assets` role yet, so
+`converge` does not act on it; `validate` does check it (manifest
+grammar, payload presence, payload integrity).
+
 **Do not use this as a template for your own workspace's secrets or
 hardware profile** — it intentionally has neither. See
 `docs/writing-a-workspace.md` for that.
