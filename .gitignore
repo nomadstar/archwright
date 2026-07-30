@@ -1,0 +1,7 @@
+# Local scratch space only — never a place to put a real workspace.
+/tmp/
+*.log
+
+# Editor/OS noise
+.DS_Store
+*.swp
