@@ -26,15 +26,20 @@ not just asserted in this README.
 
 ## What this release actually does
 
-- A CLI — `archwright validate|plan|converge|drift` — see `docs/getting-started.md`.
-- Two roles: `package` (official-repo packages via `pacman`) and `service`
-  (systemd unit enablement). No AUR, no dotfiles, no hooks, no secrets yet
-  — see `docs/decisions/0008-mvp-scope-cut.md` for the full list of what
-  was deliberately deferred and why.
+- A CLI — `archwright validate|plan|converge|drift|asset` — see `docs/getting-started.md`.
+- Three roles: `package` (official-repo packages via `pacman`), `service`
+  (systemd unit enablement), and `assets` (individual declared files under
+  `$HOME` — wallpapers, scripts, fonts — captured explicitly via
+  `archwright asset capture`, never inferred; see
+  `docs/decisions/0014-declared-assets-and-capture-restore-lifecycle.md`).
+  No AUR, no dotfiles (symlink/templating management), no hooks, no
+  secrets yet — see `docs/decisions/0008-mvp-scope-cut.md` for the full
+  list of what was deliberately deferred and why.
 - A `check → apply → verify` contract every role follows, documented
   precisely in `docs/contract.md`.
-- Workspace Specification v0: two plain-text list formats and one flat
-  `key=value` profile format — no YAML/TOML parser, and nothing under a
+- Workspace Specification v0.1: two plain-text list formats, one flat
+  `key=value` profile format, and one content-addressed asset
+  manifest/payload format — no YAML/TOML parser, and nothing under a
   workspace directory is ever executed (`docs/decisions/0007`).
 - `apply` never removes a package or disables a service —
   `docs/decisions/0005-no-automatic-removal.md`.

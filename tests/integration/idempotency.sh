@@ -53,6 +53,11 @@ if [[ "$rc" -ne 0 && "$rc" -ne 2 ]]; then
 fi
 info "first converge: exit ${rc} (expected 0 or 2)"
 
+info "extra check: the workspace's one declared asset was actually restored"
+restored_file="${HOME}/.local/share/archwright-example/note.txt"
+[[ -f "$restored_file" ]] || fail "asset not restored: ${restored_file} does not exist after converge"
+info "asset restored at ${restored_file}"
+
 info "step 4/5: archwright converge (SECOND run — this is the property under test)"
 "$ARCHWRIGHT" converge --workspace "$WORKSPACE" --profile "$PROFILE"
 assert_exit "second converge (idempotency claim)" 0 "$?"

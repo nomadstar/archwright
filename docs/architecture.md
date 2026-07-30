@@ -24,10 +24,12 @@ bin/archwright              CLI entrypoint: parses args, dispatches to a command
 lib/contract.sh             exit codes, logging, role dispatch — no workspace-specific logic
 lib/workspace.sh            Workspace Spec v0 parser/validator — read-only, never executes workspace content
 lib/commands/*.sh           validate / plan / converge / drift — orchestrate roles, own no state of their own
+lib/commands/asset*.sh      asset capture / scan / list — see ADR 0014, not part of the role contract
 lib/roles/package.sh        the `package` role (pacman, official repos only)
 lib/roles/service.sh        the `service` role (systemd, enable-only)
+lib/roles/assets.sh         the `assets` role (declared files under $HOME, restore direction — ADR 0014)
 examples/minimal-workspace/ a fictional workspace: fixture + docs example + CI subject
-docs/spec/                  Workspace Specification v0, format-by-format
+docs/spec/                  Workspace Specification v0.1, format-by-format
 docs/contract.md            the check/apply/verify contract, exit codes, message format
 ```
 
@@ -41,7 +43,7 @@ the system itself, not a cached record of it.
 1. bin/archwright parses --workspace/--profile, resolves W to an absolute path
 2. lib/workspace.sh loads profiles/P.conf, resolving packages=/services_*= into
    absolute file paths, validating along the way (throws on any problem)
-3. lib/commands/converge.sh iterates ARCHWRIGHT_ROLES = "package service", for each:
+3. lib/commands/converge.sh iterates ARCHWRIGHT_ROLES = "package service assets", for each:
      a. call role_check  — read-only; returns EXIT_OK or EXIT_CHANGED or EXIT_VALIDATION_ERROR
      b. if EXIT_OK: skip this role, nothing to do
      c. if EXIT_CHANGED: call role_apply, then role_verify
@@ -54,14 +56,23 @@ but additionally treats any `status=undeclared*` finding as drift even
 though it doesn't affect a role's own exit code (see
 `lib/commands/drift.sh`).
 
-## Why only two roles, and why these two
+## Why these three roles
 
 `package` and `service` are the two most common, least ambiguous
 building blocks of "what does this system have installed and running" —
 and both map onto a single, well-understood native command
 (`pacman`, `systemctl`) rather than requiring the engine to shell out to a
-third-party tool. `dotfiles` and `hooks` are deliberately deferred; see
-`docs/decisions/0008-mvp-scope-cut.md`.
+third-party tool. `assets` (ADR 0014) is the third: individual files under
+`$HOME` a configuration depends on but that `package`/`service` can't
+express — declared explicitly (`archwright asset capture`), never
+inferred. `dotfiles` (symlink/templating management) and `hooks` remain
+deliberately deferred; see `docs/decisions/0008-mvp-scope-cut.md`.
+
+Unlike `package`/`service`, `assets` is not scoped by `--profile` — there
+is no `assets=` profile key. Every declared asset under
+`assets/manifest/*.conf` is restored on every `converge`, the same way
+`archwright validate` already checks every manifest regardless of which
+profile is active.
 
 ## Security posture of this release
 

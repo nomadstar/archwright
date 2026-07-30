@@ -5,7 +5,9 @@ workspace. It doesn't touch your real system's package or service state
 beyond what `examples/minimal-workspace` declares (`tree`, `openssh`,
 `systemd-timesyncd.service` — see `examples/minimal-workspace/README.md`
 for why those were chosen), and every command tells you what it's about
-to do before `converge` does anything.
+to do before `converge` does anything. It does write one small file under
+your own `$HOME` (`~/.local/share/archwright-example/note.txt`, from the
+workspace's one declared asset — see "Declared assets" below).
 
 ## Prerequisites
 
@@ -39,6 +41,33 @@ echo "exit code: $?"   # expect 0
 
 Step 4 printing exit code `0` (not `2`) is the whole point of this
 project's first release — see `docs/architecture.md`.
+
+## Declared assets
+
+`converge` also restores any declared assets (`assets/manifest/*.conf`)
+to their destination under `$HOME` — the bundled example declares one
+(`examples/minimal-workspace/assets/manifest/example-note.conf`), so step
+3 above also creates `~/.local/share/archwright-example/note.txt`. See
+`docs/spec/assets-format.md` and
+`docs/decisions/0014-declared-assets-and-capture-restore-lifecycle.md` for
+the full design.
+
+To declare your own:
+
+```sh
+# 1. See what a config file already on disk references (read-only, never
+#    scans anything you don't name explicitly)
+./bin/archwright asset scan ~/.config/i3/config --workspace <your-workspace>
+
+# 2. Explicitly capture one file into the workspace (system -> workspace)
+./bin/archwright asset capture ~/Pictures/wallpapers/forest.jpg --workspace <your-workspace>
+
+# 3. See everything currently declared
+./bin/archwright asset list --workspace <your-workspace>
+
+# 4. `archwright converge` (see above) restores every declared asset —
+#    workspace -> system, the opposite direction from capture.
+```
 
 ## Writing your own workspace
 
