@@ -31,6 +31,8 @@ USAGE:
 
   archwright asset capture <path> --workspace <path> [--id <slug>]
                                    [--allow-executable] [--max-size <bytes>]
+  archwright asset scan <file-or-dir>... --workspace <path>
+  archwright asset list --workspace <path>
 
   archwright --version
   archwright --help
