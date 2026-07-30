@@ -1,0 +1,8 @@
+# Minimal, fictional package list — used as documentation example, unit
+# test fixture, and CI integration fixture. Not anyone's real machine.
+#
+# Chosen deliberately: small, dependency-light, and side-effect-free to
+# install inside an ephemeral container (no daemon starts on install alone).
+
+tree
+openssh

@@ -1,0 +1,7 @@
+# sshd.service ships with the `openssh` package declared in
+# packages/official.txt. Enabling it (never starting it — see
+# docs/decisions/0005-no-automatic-removal.md) is a safe, observable side
+# effect for the idempotency test: `systemctl is-enabled` flips from
+# "disabled" to "enabled" and stays there on a second run.
+
+sshd.service

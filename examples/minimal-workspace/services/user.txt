@@ -1,0 +1,4 @@
+# No user-scope units are declared in this example workspace. The file is
+# still present and referenced from profiles/ci.conf to demonstrate that an
+# empty declaration is valid: the service role reports nothing to do for
+# user units instead of treating an empty file as an error.
