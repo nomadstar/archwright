@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/banner.png" alt="Archwright — design, structure, automate" width="100%">
+</p>
+
 # Archwright
 
 A minimal, auditable engine for declaring and converging the state of an
