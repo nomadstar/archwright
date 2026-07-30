@@ -8,8 +8,12 @@
 # Security invariant: this file (and everything it sources) must never
 # `source` or `eval` content that originates from a workspace directory.
 # Workspace files are data, read with plain `read`/`grep`/`cut` — never code.
-
-set -euo pipefail
+#
+# Deliberately does NOT `set -e`/`-u`/`pipefail` here: this file is sourced
+# by bin/archwright (which does set them) but also by bats unit tests and
+# other tooling that must not have its own shell options silently changed
+# by a library it imports. Every function below is written to behave
+# correctly whether or not the caller has errexit enabled.
 
 # --- Exit codes (stable, documented in docs/contract.md) -------------------
 readonly EXIT_OK=0                # success, system already conformed / no drift

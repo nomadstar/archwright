@@ -10,6 +10,9 @@
 # `read`/grep-style parsing. Nothing under a workspace directory is ever
 # sourced, eval'd, or executed.
 #
+# Deliberately does NOT `set -e`/`-u`/`pipefail` (see the same note at the
+# top of lib/contract.sh) — this file is sourced by test harnesses too.
+#
 # Two layers are exposed on purpose:
 #   archwright_try_load_profile  — never exits, returns 0/1, used by
 #                                   `validate` to check every profile and
@@ -17,8 +20,6 @@
 #   archwright_load_profile      — throwing wrapper used by plan/converge/
 #                                   drift, which only ever need ONE profile
 #                                   and should abort immediately if it is bad.
-
-set -euo pipefail
 
 readonly ARCHWRIGHT_SPEC_VERSION="0"
 readonly ARCHWRIGHT_PROFILE_ALLOWED_KEYS="name description packages services_system services_user"
