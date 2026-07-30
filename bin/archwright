@@ -29,6 +29,9 @@ USAGE:
   archwright converge --workspace <path> --profile <name>
   archwright drift    --workspace <path> --profile <name>
 
+  archwright asset capture <path> --workspace <path> [--id <slug>]
+                                   [--allow-executable] [--max-size <bytes>]
+
   archwright --version
   archwright --help
 
@@ -36,8 +39,9 @@ validate  Check workspace structure and every profile. No system changes.
 plan      Run the check() stage only; report what converge would do.
 converge  Run check(), then apply()+verify() for roles with pending changes.
 drift     Report-only comparison of declared vs. real state.
+asset     Declared-asset actions (system<->workspace). See ADR 0014.
 
-See docs/spec/ for the Workspace Specification (currently v0, unstable)
+See docs/spec/ for the Workspace Specification (currently v0.1, unstable)
 and docs/contract.md for the role contract and the exit code reference.
 EOF
 }
@@ -59,6 +63,14 @@ case "$1" in
 esac
 
 subcommand="$1"; shift
+
+if [[ "$subcommand" == "asset" ]]; then
+  # shellcheck source=lib/commands/asset.sh
+  source "${ARCHWRIGHT_LIB_DIR}/commands/asset.sh"
+  cmd_asset "$@"
+  exit $?
+fi
+
 workspace=""
 profile=""
 
