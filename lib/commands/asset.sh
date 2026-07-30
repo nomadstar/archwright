@@ -10,7 +10,7 @@
 
 cmd_asset() {
   local action="${1:-}"
-  [[ -n "$action" ]] || archwright_die "$EXIT_UNEXPECTED" "usage: archwright asset <capture> ..."
+  [[ -n "$action" ]] || archwright_die "$EXIT_UNEXPECTED" "usage: archwright asset <capture|scan|list> ..."
   shift
 
   case "$action" in
@@ -19,8 +19,18 @@ cmd_asset() {
       source "${ARCHWRIGHT_LIB_DIR}/commands/asset_capture.sh"
       cmd_asset_capture "$@"
       ;;
+    scan)
+      # shellcheck source=lib/commands/asset_scan.sh
+      source "${ARCHWRIGHT_LIB_DIR}/commands/asset_scan.sh"
+      cmd_asset_scan "$@"
+      ;;
+    list)
+      # shellcheck source=lib/commands/asset_list.sh
+      source "${ARCHWRIGHT_LIB_DIR}/commands/asset_list.sh"
+      cmd_asset_list "$@"
+      ;;
     *)
-      archwright_die "$EXIT_UNEXPECTED" "unknown 'archwright asset' action: '${action}' (expected: capture)"
+      archwright_die "$EXIT_UNEXPECTED" "unknown 'archwright asset' action: '${action}' (expected: capture, scan, or list)"
       ;;
   esac
 }
