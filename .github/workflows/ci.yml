@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: bash -n syntax check
+        run: |
+          set -e
+          mapfile -t files < <(find bin lib scripts tests/integration -type f \( -name '*.sh' -o -name 'archwright' \))
+          for f in "${files[@]}"; do
+            echo "bash -n $f"
+            bash -n "$f"
+          done
+      - name: shellcheck
+        run: |
+          set -e
+          mapfile -t files < <(find bin lib scripts tests/integration -type f \( -name '*.sh' -o -name 'archwright' \))
+          shellcheck "${files[@]}"
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan the repository for accidentally-committed secrets or personal data
+        run: ./scripts/check-secrets.sh
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install bats
+        run: sudo apt-get update -y && sudo apt-get install -y bats
+      - name: Run unit tests
+        run: bats tests/unit/

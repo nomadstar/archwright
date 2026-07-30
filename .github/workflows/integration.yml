@@ -1,0 +1,56 @@
+name: Integration (idempotency)
+
+# Proves the idempotency claim (docs/architecture.md) by running
+# tests/integration/idempotency.sh inside a real, ephemeral Arch Linux
+# container with systemd as PID 1. See docs/testing.md's "Known fragility"
+# section: this is the highest-risk piece of CI in this project, because
+# systemd-in-a-container depends on cgroup delegation working the way this
+# workflow assumes. If this workflow starts flaking, check that assumption
+# before assuming the engine itself regressed.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  idempotency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start a systemd-capable Arch Linux container
+        run: |
+          set -e
+          docker run -d --name archwright-it \
+            --privileged --cgroupns=host \
+            -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
+            -v "${GITHUB_WORKSPACE}:/archwright:ro" \
+            archlinux:base-devel \
+            sh -c "pacman -Sy --noconfirm systemd >/dev/null 2>&1 && exec /usr/lib/systemd/systemd --system"
+
+      - name: Wait for systemd to reach a running state
+        run: |
+          set -e
+          for i in $(seq 1 30); do
+            state="$(docker exec archwright-it systemctl is-system-running 2>/dev/null || true)"
+            echo "systemd state: ${state:-<unreachable>}"
+            case "$state" in
+              running|degraded) exit 0 ;;
+            esac
+            sleep 2
+          done
+          echo "systemd never reached a usable state" >&2
+          docker exec archwright-it journalctl --no-pager 2>&1 | tail -n 200 || true
+          exit 1
+
+      - name: Run the idempotency test inside the container
+        run: docker exec archwright-it bash /archwright/tests/integration/idempotency.sh
+
+      - name: Dump journal on failure
+        if: failure()
+        run: docker exec archwright-it journalctl --no-pager 2>&1 | tail -n 300 || true
+
+      - name: Tear down the container
+        if: always()
+        run: docker rm -f archwright-it || true
